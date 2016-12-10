@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class RoomController : MonoBehaviour {
-    enum ROOM_SIDES {FLOOR, WALL_N, WALL_E, WALL_S, WALL_W, CEILING};
+    public enum ROOM_SIDES {FLOOR, WALL_N, WALL_E, WALL_S, WALL_W, CEILING};
     Dictionary<ROOM_SIDES, RoomGrid> roomSides;
     RoomGrid highlight;
 
@@ -15,6 +15,11 @@ public class RoomController : MonoBehaviour {
     public int gridWidth = 20;
     public int gridHeight = 20;
     public float cubeSize = 5.0f;
+
+    private Vector3 roomTargetRotation;
+    public float roomRotationSpeed = 2.0f;
+    private ROOM_SIDES currentSide = ROOM_SIDES.FLOOR;
+    private bool isRotating = false;
 
     // inicialize map qube
     void Awake () {
@@ -55,6 +60,8 @@ public class RoomController : MonoBehaviour {
         // top side
         currentGrid = InstantiateGridSide(new Vector3(halfRoomSize, halfRoomSize, -halfRoomSize), new Vector3(0, 0, 180), 0.0f, "Ceiling grid", gridBaseMat);
         roomSides.Add(ROOM_SIDES.CEILING, currentGrid);
+
+        currentSide = ROOM_SIDES.FLOOR;
     }
 
     // instantiate grid on given position and return RoomGrid component on new grid
@@ -79,6 +86,27 @@ public class RoomController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
+		// testing rotation
+        if (Input.GetKeyDown(KeyCode.A)) {
+            RotateRoom(currentSide++);
+            if (currentSide == ROOM_SIDES.CEILING) {
+                currentSide = ROOM_SIDES.FLOOR;
+            } 
+        }
+
+        if (isRotating) {
+            Quaternion targetRotation = Quaternion.Euler(roomTargetRotation);
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * roomRotationSpeed);
+            if (Quaternion.Angle(transform.rotation, targetRotation) < 0.5) {
+                transform.rotation = targetRotation;
+                isRotating = false;
+            }
+        }
 	}
+
+    public void RotateRoom(ROOM_SIDES targetSide) {
+        RoomGrid targetGrid = roomSides[targetSide];
+        roomTargetRotation = targetGrid.transform.localRotation.eulerAngles;
+        isRotating = true;
+    }
 }

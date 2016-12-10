@@ -97,3 +97,4 @@ MonoBehaviour:
   gridWidth: 30
   gridHeight: 30
   cubeSize: 10
+  roomRotationSpeed: 5
