@@ -5,11 +5,10 @@ using UnityEngine;
 public class RoomController : MonoBehaviour {
     public enum ROOM_SIDES {FLOOR, WALL_N, WALL_E, WALL_S, WALL_W, CEILING};
     Dictionary<ROOM_SIDES, RoomGrid> roomSides;
-    RoomGrid highlight;
+    public RoomGrid highlight;
 
     // presets
     public GameObject gridPrefab;
-    public Material highlightMat;
     public Material gridBaseMat;
 
     public int gridWidth = 20;
@@ -29,10 +28,9 @@ public class RoomController : MonoBehaviour {
 
         float halfRoomSize = cubeSize / 2;
 
-        highlight = InstantiateGridSide(new Vector3(-halfRoomSize, -halfRoomSize + 0.01f, -halfRoomSize), new Vector3(0, 0, 0), 0.15f, "Highlight grid", highlightMat);
-
-        // unparrent highlight grid to prevent roration
-        highlight.transform.parent = null;
+        highlight.transform.localScale = new Vector3(cubeSize / (gridWidth + 1), 1, cubeSize / (gridWidth + 1));
+        highlight.transform.localPosition = new Vector3(-halfRoomSize, -halfRoomSize + 0.01f, -halfRoomSize);
+        highlight.CreateGrid(gridWidth, gridHeight, 0.1f);
 
         // initialize room
         roomSides = new Dictionary<ROOM_SIDES, RoomGrid>();
