@@ -16,31 +16,50 @@ public class RoomController : MonoBehaviour {
     public int gridHeight = 20;
     public float cubeSize = 5.0f;
 
+    // inicialize map qube
     void Awake () {
         if (!gridPrefab) {
             Debug.LogError("RoomController missing grid prefab");
         }
 
-        highlight = InstantiateGridSide(new Vector3(-cubeSize / 2, 0.01f, -cubeSize / 2), new Vector3(0, 0, 0), 0.15f, highlightMat);
+        highlight = InstantiateGridSide(new Vector3(-cubeSize / 2, 0.01f, -cubeSize / 2), new Vector3(0, 0, 0), 0.15f, "Highlight grid", highlightMat);
 
         // initialize room
         roomSides = new Dictionary<ROOM_SIDES, RoomGrid>();
 
         // floor
-        RoomGrid currentGrid = InstantiateGridSide(new Vector3(-cubeSize / 2, 0f, -cubeSize / 2), new Vector3(0, 0, 0), 0.0f, gridBaseMat);
+        RoomGrid currentGrid = InstantiateGridSide(new Vector3(-cubeSize / 2, 0f, -cubeSize / 2), new Vector3(0, 0, 0), 0.0f, "Floor grid", gridBaseMat);
         roomSides.Add(ROOM_SIDES.FLOOR, currentGrid);
 
-        currentGrid = InstantiateGridSide(new Vector3(-cubeSize / 2, 0f, -cubeSize / 2), new Vector3(0, 0, 0), 0.0f, gridBaseMat);
-        roomSides.Add(ROOM_SIDES.FLOOR, currentGrid);
+        // north side
+        currentGrid = InstantiateGridSide(new Vector3(-cubeSize / 2, cubeSize, -cubeSize / 2), new Vector3(90, 0, 0), 0.0f, "Wall N grid", gridBaseMat);
+        roomSides.Add(ROOM_SIDES.WALL_N, currentGrid);
 
+        // south side
+        currentGrid = InstantiateGridSide(new Vector3(-cubeSize / 2, 0, cubeSize / 2), new Vector3(-90, 0, 0), 0.0f, "Wall S grid", gridBaseMat);
+        roomSides.Add(ROOM_SIDES.WALL_S, currentGrid);
+
+        // west side
+        currentGrid = InstantiateGridSide(new Vector3(cubeSize / 2, 0, -cubeSize / 2), new Vector3(0, 0, 90), 0.0f, "Wall W grid", gridBaseMat);
+        roomSides.Add(ROOM_SIDES.WALL_W, currentGrid);
+
+        // east side
+        currentGrid = InstantiateGridSide(new Vector3(-cubeSize / 2, cubeSize, -cubeSize / 2), new Vector3(0, 0, -90), 0.0f, "Wall E grid", gridBaseMat);
+        roomSides.Add(ROOM_SIDES.WALL_E, currentGrid);
+
+        // top side
+        currentGrid = InstantiateGridSide(new Vector3(cubeSize / 2, cubeSize, -cubeSize / 2), new Vector3(0, 0, 180), 0.0f, "Ceiling grid", gridBaseMat);
+        roomSides.Add(ROOM_SIDES.CEILING, currentGrid);
     }
 
     // instantiate grid on given position and return RoomGrid component on new grid
-    private RoomGrid InstantiateGridSide(Vector3 position, Vector3 rotation, float spacing, Material gridMat) {
+    private RoomGrid InstantiateGridSide(Vector3 position, Vector3 rotation, float spacing, string name, Material gridMat) {
         GameObject gridObj = Instantiate(gridPrefab);
-        gridObj.transform.localScale = new Vector3(cubeSize / gridWidth, 1, cubeSize / gridHeight);
+        gridObj.transform.parent = this.transform;
+        gridObj.transform.localScale = new Vector3(cubeSize / (gridWidth + 1), 1, cubeSize / (gridWidth + 1));
         gridObj.transform.localPosition = position;
         gridObj.transform.Rotate(rotation);
+        gridObj.name = name;
         gridObj.GetComponent<MeshRenderer>().material = gridMat;
 
         RoomGrid grid = gridObj.GetComponent<RoomGrid>();
