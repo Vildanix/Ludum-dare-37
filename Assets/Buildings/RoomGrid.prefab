@@ -9,32 +9,32 @@ Prefab:
     m_Modifications: []
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
-  m_RootGameObject: {fileID: 1958808949939320}
+  m_RootGameObject: {fileID: 1039198987362894}
   m_IsPrefabParent: 1
---- !u!1 &1958808949939320
+--- !u!1 &1039198987362894
 GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   serializedVersion: 5
   m_Component:
-  - component: {fileID: 4071025640193358}
-  - component: {fileID: 33047589590599606}
-  - component: {fileID: 23660988055007744}
-  - component: {fileID: 114160934307219972}
+  - component: {fileID: 4272477809582510}
+  - component: {fileID: 33005049633647236}
+  - component: {fileID: 23139015433366688}
+  - component: {fileID: 114397429192350406}
   m_Layer: 0
-  m_Name: Room
+  m_Name: RoomGrid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4071025640193358
+--- !u!4 &4272477809582510
 Transform:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1958808949939320}
+  m_GameObject: {fileID: 1039198987362894}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -42,12 +42,12 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &23660988055007744
+--- !u!23 &23139015433366688
 MeshRenderer:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1958808949939320}
+  m_GameObject: {fileID: 1039198987362894}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -55,7 +55,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: f2bd64f3d5b8f4344a72946766bc88a7, type: 2}
+  - {fileID: 2100000, guid: c19cbb22a806e8f4aae214e87440a22f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -73,24 +73,21 @@ MeshRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingOrder: 0
---- !u!33 &33047589590599606
+--- !u!33 &33005049633647236
 MeshFilter:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1958808949939320}
+  m_GameObject: {fileID: 1039198987362894}
   m_Mesh: {fileID: 0}
---- !u!114 &114160934307219972
+--- !u!114 &114397429192350406
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1958808949939320}
+  m_GameObject: {fileID: 1039198987362894}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8948969418a78394290876c22f007e9f, type: 3}
+  m_Script: {fileID: 11500000, guid: 4056a75b5d210024db3cb3d388def4d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridPrefab: {fileID: 1039198987362894, guid: cbdf679f4afc34f40befe5b04cca53ae, type: 2}
-  gridWidth: 20
-  gridHeight: 20
