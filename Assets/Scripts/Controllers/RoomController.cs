@@ -28,7 +28,7 @@ public class RoomController : MonoBehaviour {
 
         float halfRoomSize = cubeSize / 2;
 
-        highlight.transform.localScale = new Vector3(cubeSize / (gridWidth + 1), 1, cubeSize / (gridWidth + 1));
+        highlight.transform.localScale = new Vector3(cubeSize / gridWidth, 1, cubeSize / gridWidth);
         highlight.transform.localPosition = new Vector3(-halfRoomSize, -halfRoomSize + 0.01f, -halfRoomSize);
         highlight.CreateGrid(gridWidth, gridHeight, 0.1f);
 
@@ -66,7 +66,7 @@ public class RoomController : MonoBehaviour {
     private RoomGrid InstantiateGridSide(Vector3 position, Vector3 rotation, float spacing, string name, Material gridMat) {
         GameObject gridObj = Instantiate(gridPrefab);
         gridObj.transform.parent = this.transform;
-        gridObj.transform.localScale = new Vector3(cubeSize / (gridWidth + 1), 1, cubeSize / (gridWidth + 1));
+        gridObj.transform.localScale = new Vector3(cubeSize / gridWidth, 1, cubeSize / gridWidth);
         gridObj.transform.localPosition = position;
         gridObj.transform.Rotate(rotation);
         gridObj.name = name;

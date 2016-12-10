@@ -31,8 +31,8 @@ public class RoomGrid : MonoBehaviour{
         gridMesh.name = "Room Grid plane";
 
         // create mesh vertices. Each grid cell have separate quad
-        for (int i = 0, y = 0; y <= cell_y; y++) {
-            for (int x = 0; x <= cell_x; x++, i++) {
+        for (int i = 0, y = 0; y < cell_y; y++) {
+            for (int x = 0; x < cell_x; x++, i++) {
                 CreateGridQuad(i, x, y, new Vector2(0, 0), spacing);
             }
         }
