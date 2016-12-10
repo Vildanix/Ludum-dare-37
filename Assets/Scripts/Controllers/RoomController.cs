@@ -26,6 +26,9 @@ public class RoomController : MonoBehaviour {
 
         highlight = InstantiateGridSide(new Vector3(-halfRoomSize, -halfRoomSize + 0.01f, -halfRoomSize), new Vector3(0, 0, 0), 0.15f, "Highlight grid", highlightMat);
 
+        // unparrent highlight grid to prevent roration
+        highlight.transform.parent = null;
+
         // initialize room
         roomSides = new Dictionary<ROOM_SIDES, RoomGrid>();
 
@@ -68,6 +71,10 @@ public class RoomController : MonoBehaviour {
         grid.CreateGrid(gridWidth, gridHeight, spacing);
 
         return grid;
+    }
+
+    public float getCubeSize() {
+        return cubeSize;
     }
 	
 	// Update is called once per frame

@@ -154,6 +154,12 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!114 &161168512 stripped
+MonoBehaviour:
+  m_PrefabParentObject: {fileID: 114160934307219972, guid: 5fd52001e1412ba4688493c0ef3305e7,
+    type: 2}
+  m_PrefabInternal: {fileID: 1507375133}
+  m_Script: {fileID: 11500000, guid: 8948969418a78394290876c22f007e9f, type: 3}
 --- !u!1 &655711405
 GameObject:
   m_ObjectHideFlags: 0
@@ -166,6 +172,7 @@ GameObject:
   - component: {fileID: 655711408}
   - component: {fileID: 655711407}
   - component: {fileID: 655711406}
+  - component: {fileID: 655711411}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -202,16 +209,16 @@ Camera:
   m_GameObject: {fileID: 655711405}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
-  far clip plane: 1000
+  near clip plane: 0.1
+  far clip plane: 50
   field of view: 60
   orthographic: 0
   orthographic size: 5
@@ -241,6 +248,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!114 &655711411
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 655711405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5171d001d89e5bb41910c36691cb8f39, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  roomController: {fileID: 161168512}
 --- !u!1001 &1507375133
 Prefab:
   m_ObjectHideFlags: 0
@@ -280,21 +299,10 @@ Prefab:
       propertyPath: m_RootOrder
       value: 2
       objectReference: {fileID: 0}
-    - target: {fileID: 114160934307219972, guid: 5fd52001e1412ba4688493c0ef3305e7,
-        type: 2}
-      propertyPath: gridMat
-      value: 
-      objectReference: {fileID: 2100000, guid: f2bd64f3d5b8f4344a72946766bc88a7, type: 2}
-    - target: {fileID: 114160934307219972, guid: 5fd52001e1412ba4688493c0ef3305e7,
-        type: 2}
-      propertyPath: highlightMat
-      value: 
-      objectReference: {fileID: 2100000, guid: c19cbb22a806e8f4aae214e87440a22f, type: 2}
-    - target: {fileID: 114160934307219972, guid: 5fd52001e1412ba4688493c0ef3305e7,
-        type: 2}
-      propertyPath: gridBaseMat
-      value: 
-      objectReference: {fileID: 2100000, guid: f2bd64f3d5b8f4344a72946766bc88a7, type: 2}
+    - target: {fileID: 1958808949939320, guid: 5fd52001e1412ba4688493c0ef3305e7, type: 2}
+      propertyPath: m_Name
+      value: RoomController
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 5fd52001e1412ba4688493c0ef3305e7, type: 2}
   m_IsPrefabParent: 0
