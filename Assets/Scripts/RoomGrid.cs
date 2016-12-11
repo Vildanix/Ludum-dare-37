@@ -44,9 +44,7 @@ public class RoomGrid : MonoBehaviour{
         if (!isHighlight) {
             gridInformation = new GridData[cell_x * cell_y];
             for (int i = 0; i < cell_x * cell_y; i++) {
-                gridInformation[i] = new GridData();
-                gridInformation[i].PosX = i % gridWidth;
-                gridInformation[i].PosY = i / gridWidth;
+                gridInformation[i] = new GridData(i % gridWidth, i / gridWidth, this);
             }
         }
 
@@ -186,6 +184,18 @@ public class RoomGrid : MonoBehaviour{
         }
     }
 
+    public GenericBuilding InstantiateBuildingOnGrid(GenericBuilding prototype, int x, int y) {
+        GenericBuilding instantiatedBuilding = Instantiate(prototype, transform);
 
+        instantiatedBuilding.transform.localPosition = getConstructionPosition(x, y);
+        instantiatedBuilding.transform.localScale = Vector3.one;
+        instantiatedBuilding.transform.localRotation = Quaternion.identity;
+
+        return instantiatedBuilding;
+    }
+
+    public Vector3 getConstructionPosition(int x, int y) {
+        return new Vector3(x + 0.5f, 0, y + 0.5f);
+    }
 
 }

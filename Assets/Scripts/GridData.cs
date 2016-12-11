@@ -9,6 +9,7 @@ public class GridData {
     private Action<GRID_STATE, GridData> notifications;
     private int posX;
     private int posY;
+    private RoomGrid parentGrid;
 
     public int PosX {
         get {
@@ -30,11 +31,13 @@ public class GridData {
         }
     }
 
-    public GridData() {
+    public GridData(RoomGrid parentGrid) {
+        this.parentGrid = parentGrid;
         gridState = GRID_STATE.AVALIBLE;
     }
 
-    public GridData(int x, int y) {
+    public GridData(int x, int y, RoomGrid parentGrid) {
+        this.parentGrid = parentGrid;
         gridState = GRID_STATE.AVALIBLE;
         posX = x;
         posY = y;
@@ -49,8 +52,21 @@ public class GridData {
     }
 
     public void ConstructBuilding(GenericBuilding newBuilding) {
-        gridBuilding = newBuilding;
-        notifications(gridState, this);
+        if (gridState != GRID_STATE.AVALIBLE) {
+            return;
+        }
+
+        gridBuilding = parentGrid.InstantiateBuildingOnGrid(newBuilding, posX, posY);
+        gridState = GRID_STATE.BUILDED;
+
+        if (notifications != null) {
+            notifications(gridState, this);
+        }
+    }
+
+    public void DestroyBuilding() {
+        GameObject.Destroy(gridBuilding);
+        gridState = GRID_STATE.AVALIBLE;
     }
 
     public GRID_STATE GetGridState() {

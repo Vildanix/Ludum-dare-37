@@ -9,7 +9,7 @@ public class HightlightController : MonoBehaviour {
     public float overlayRestoreTime = 0.5f;
     private float overlayTimer = 0;
 
-    private RoomGrid activeGrid;
+    //private RoomGrid activeGrid;
     private GridData[] highlightedCells;
 
     private bool isInteractionEnabled = true;
@@ -48,7 +48,7 @@ public class HightlightController : MonoBehaviour {
 
     // set highlighter reference to new active grid
     public void SetActiveGrid(RoomGrid grid) {
-        activeGrid = grid;
+        //activeGrid = grid;
 
         // rebuild highlight for new grid
         GridData[] gridData = grid.GetGridData();

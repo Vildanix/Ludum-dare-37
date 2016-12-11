@@ -2,10 +2,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GenericBuilding {
+public class GenericBuilding : MonoBehaviour{
+    public enum BUILDING_TYPE { BUS, MEMORY, SCIENCE, ENERGY_STORAGE, ENERGY_NODE, DATA_NODE}
+
+    [SerializeField]
+    private BUILDING_TYPE buildingType;
+
+    [SerializeField]
     private string buildingName;
+
+    [SerializeField]
+    [Range(-20, 100)]
     private int energy;
+
+    [SerializeField]
+    [Range(0, 20)]
     private int requiredPopulation;
+
     private int posX;
     private int posY;
 
@@ -58,4 +71,16 @@ public class GenericBuilding {
             posY = value;
         }
     }
+
+    public BUILDING_TYPE BuildingType {
+        get {
+            return buildingType;
+        }
+
+        set {
+            buildingType = value;
+        }
+    }
+
+    
 }

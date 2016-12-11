@@ -28,7 +28,18 @@ public class RoomController : MonoBehaviour {
     private RoomGrid activeGrid;
     public LayerMask interactionMask;
 
-    public enum CONSTRUCTION_MODE {NONE, BUS, STORAGE, ENERGY_BANK, DESTROY};
+    [Header("BuildingObjects")]
+    // building for map setup
+    public GenericBuilding dataSource;
+    public GenericBuilding energySource;
+
+    // building for player
+    public GenericBuilding bus;
+    public GenericBuilding storage;
+    public GenericBuilding energyStorage;
+    public GenericBuilding scienceCenter;
+
+    public enum CONSTRUCTION_MODE {NONE, BUS, STORAGE, ENERGY_BANK, DESTROY, SCIENCE};
     private CONSTRUCTION_MODE constructionMode = CONSTRUCTION_MODE.NONE;
 
     // inicialize map qube
@@ -44,7 +55,7 @@ public class RoomController : MonoBehaviour {
         float halfRoomSize = cubeSize / 2;
 
         RoomGrid highlightGrid = highlightController.GetComponent<RoomGrid>();
-        highlightGrid.transform.localScale = new Vector3(cubeSize / gridWidth, 1, cubeSize / gridWidth);
+        highlightGrid.transform.localScale = new Vector3(cubeSize / gridWidth, cubeSize / gridWidth, cubeSize / gridWidth);
         highlightGrid.transform.localPosition = new Vector3(-halfRoomSize, -halfRoomSize + 0.01f, -halfRoomSize);
         highlightGrid.CreateGrid(gridWidth, gridHeight, 0.1f, true);
         highlightController.DisableInteraction();
@@ -84,7 +95,7 @@ public class RoomController : MonoBehaviour {
     private RoomGrid InstantiateGridSide(Vector3 position, Vector3 rotation, float spacing, string name, Material gridMat) {
         GameObject gridObj = Instantiate(gridPrefab);
         gridObj.transform.parent = this.transform;
-        gridObj.transform.localScale = new Vector3(cubeSize / gridWidth, 1, cubeSize / gridWidth);
+        gridObj.transform.localScale = new Vector3(cubeSize / gridWidth, cubeSize / gridWidth, cubeSize / gridWidth);
         gridObj.transform.localPosition = position;
         gridObj.transform.Rotate(rotation);
         gridObj.name = name;
@@ -159,11 +170,13 @@ public class RoomController : MonoBehaviour {
                 startDrag = Vector3.zero;
                 isDragSelect = false;
                 // do selected action on selected cells
+                ConstructOnGridCells(highlightedCells);
             }
         }
     }
 
     private void HandleConstructionCancel() {
+        // cancel construction when escape or right mouse button is pressed
         if (Input.GetKeyDown(KeyCode.Escape) || Input.GetMouseButtonDown(1)) {
             constructionMode = CONSTRUCTION_MODE.NONE;
             highlightController.DisableInteraction();
@@ -172,7 +185,7 @@ public class RoomController : MonoBehaviour {
 
     public void RotateRoom(ROOM_SIDES targetSide) {
         activeGrid = roomSides[targetSide];
-        roomTargetRotation = activeGrid.transform.localRotation.eulerAngles;
+        roomTargetRotation = -activeGrid.transform.localRotation.eulerAngles;
         isRotating = true;
         highlightController.DisableInteraction();
         highlightController.SetActiveGrid(activeGrid);
@@ -224,6 +237,9 @@ public class RoomController : MonoBehaviour {
             case 4:
                 SetConstructionMode(CONSTRUCTION_MODE.DESTROY);
                 break;
+            case 5:
+                SetConstructionMode(CONSTRUCTION_MODE.SCIENCE);
+                break;
         }
     }
 
@@ -231,5 +247,24 @@ public class RoomController : MonoBehaviour {
         if (constructionMode != CONSTRUCTION_MODE.NONE) {
             highlightController.EnableInteraction();
         }
+    }
+
+    private void ConstructOnGridCells(GridData[] gridCells) {
+        foreach (GridData cell in gridCells) {
+            switch (constructionMode) {
+                case CONSTRUCTION_MODE.BUS:
+                    cell.ConstructBuilding(bus);
+                    break;
+                case CONSTRUCTION_MODE.STORAGE:
+                    cell.ConstructBuilding(storage);
+                    break;
+                case CONSTRUCTION_MODE.ENERGY_BANK:
+                    cell.ConstructBuilding(energyStorage);
+                    break;
+                case CONSTRUCTION_MODE.SCIENCE:
+                    cell.ConstructBuilding(scienceCenter);
+                    break;
+            }
+        } 
     }
 }
