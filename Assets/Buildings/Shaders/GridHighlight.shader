@@ -6,7 +6,8 @@ Shader "LD37/GridHighlight"
 	{
 		_MainTex ("Texture", 2D) = "white" {}
 		_CursorPos("CursorPos", Vector) = (1,1,1,1)
-		_Radius("HighlightRadius", Range(0.1,20)) = 1
+		_Radius("HighlightRadius", Range(0.05,2)) = 1
+		_Overlay("OverlayIntensity", Range(0, 1)) = 1
 	}
 	SubShader
 	{
@@ -35,6 +36,7 @@ Shader "LD37/GridHighlight"
 			struct v2f
 			{
 				float2 uv : TEXCOORD0;
+				float4 color : Color;
 				float distance : FLOAT;
 				UNITY_FOG_COORDS(1)
 				float4 vertex : SV_POSITION;
@@ -44,6 +46,7 @@ Shader "LD37/GridHighlight"
 			float4 _MainTex_ST;
 			float4 _CursorPos;
 			float _Radius;
+			float _Overlay;
 			
 			v2f vert (appdata v)
 			{
@@ -51,6 +54,7 @@ Shader "LD37/GridHighlight"
 				o.vertex = UnityObjectToClipPos(v.vertex);
 				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
 				UNITY_TRANSFER_FOG(o,o.vertex);
+				o.color = v.color;
 
 			    // calculate cursor distance from current vertex with both coords in world space
 				o.distance = distance(_CursorPos.xyz, mul(unity_ObjectToWorld, v.vertex).xyz) * _Radius;
@@ -61,8 +65,9 @@ Shader "LD37/GridHighlight"
 			fixed4 frag (v2f i) : SV_Target
 			{
 				// sample the texture
-				fixed4 col = tex2D(_MainTex, i.uv) * (1 - i.distance) * 2;
-				col.a *=  saturate(1 - i.distance);
+
+				fixed4 col = tex2D(_MainTex, i.uv + i.color.gr / 2 ) * (1 - min(i.distance, 1 - i.color.g)) * 2 * _Overlay;
+				col.a *= saturate(1 - min(i.distance, 1 - i.color.g));
 				return col;
 			}
 			ENDCG

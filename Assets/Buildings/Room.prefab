@@ -91,10 +91,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8948969418a78394290876c22f007e9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  highlightController: {fileID: 0}
   gridPrefab: {fileID: 1039198987362894, guid: cbdf679f4afc34f40befe5b04cca53ae, type: 2}
-  highlightMat: {fileID: 2100000, guid: c19cbb22a806e8f4aae214e87440a22f, type: 2}
   gridBaseMat: {fileID: 2100000, guid: f2bd64f3d5b8f4344a72946766bc88a7, type: 2}
-  gridWidth: 30
-  gridHeight: 30
+  gridWidth: 25
+  gridHeight: 25
   cubeSize: 10
-  roomRotationSpeed: 5
+  roomRotationSpeed: 6.5
+  interactionMask:
+    serializedVersion: 2
+    m_Bits: 256
