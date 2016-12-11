@@ -125,6 +125,14 @@ public class RoomGrid : MonoBehaviour{
             AsignMeshValues();
         }
     }
+
+    public void ResetGridColors() {
+        for (int i = 0; i < gridColors.Count; i++) {
+            gridColors[i] = Color.black;
+        }
+
+        AsignMeshValues();
+    }
     
     public GridData GetGridDataCell(int x, int y) {
         if (x + y * gridWidth < gridInformation.Length) {

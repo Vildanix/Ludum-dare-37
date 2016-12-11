@@ -28,6 +28,12 @@ public class RoomController : MonoBehaviour {
     private RoomGrid activeGrid;
     public LayerMask interactionMask;
 
+    // game logic values
+    private bool isGameRunning = false;
+    private int currentWorlds = 0;
+    private int wordCapacity = 0;
+
+
     [Header("BuildingObjects")]
     // building for map setup
     public GenericBuilding dataSource;
@@ -109,6 +115,14 @@ public class RoomController : MonoBehaviour {
 
     public float getCubeSize() {
         return cubeSize;
+    }
+
+    public void ResumeGame() {
+        isGameRunning = true;
+    }
+
+    public void PauseGame() {
+        isGameRunning = false;
     }
 	
 	// Update is called once per frame
