@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class RoomController : MonoBehaviour {
@@ -9,6 +10,7 @@ public class RoomController : MonoBehaviour {
     Dictionary<ROOM_SIDES, RoomGrid> roomSides;
     public HightlightController highlightController;
     public GridController gridController;
+    public AudioController audioController;
 
     // presets
     public GameObject gridPrefab;
@@ -33,6 +35,13 @@ public class RoomController : MonoBehaviour {
     private int currentWorlds = 0;
     private int wordCapacity = 0;
 
+    private int energyCount = 10;
+    private int buildingMaterialPoints = 10;
+
+    private int researchPoints = 0;
+
+    private float nextWordTimer = 20;
+
 
     [Header("BuildingObjects")]
     // building for map setup
@@ -44,6 +53,27 @@ public class RoomController : MonoBehaviour {
     public GenericBuilding storage;
     public GenericBuilding energyStorage;
     public GenericBuilding scienceCenter;
+
+    [Header("MessageWindows")]
+    public GameObject beginWindow;
+    public GameObject firstResearchWindow;
+    public GameObject secondResearchWindow;
+    public GameObject victoryWindow;
+    public GameObject failedMemoryWindow;
+
+    [Header("Statitics")]
+    public Text storageText;
+    public Text energyText;
+    public Text materialText;
+    public Text researchText;
+
+    [Header("GridTabs")]
+    public GameObject tab0;
+    public GameObject tab1;
+    public GameObject tab2;
+    public GameObject tab3;
+    public GameObject tab4;
+    public GameObject tab5;
 
     public enum CONSTRUCTION_MODE {NONE, BUS, STORAGE, ENERGY_BANK, DESTROY, SCIENCE};
     private CONSTRUCTION_MODE constructionMode = CONSTRUCTION_MODE.NONE;
@@ -73,6 +103,7 @@ public class RoomController : MonoBehaviour {
         RoomGrid currentGrid = InstantiateGridSide(new Vector3(-halfRoomSize, -halfRoomSize, -halfRoomSize), new Vector3(0, 0, 0), 0.0f, "Floor grid", gridBaseMat);
         roomSides.Add(ROOM_SIDES.FLOOR, currentGrid);
         activeGrid = currentGrid;
+        currentSide = ROOM_SIDES.FLOOR;
 
         // north side
         currentGrid = InstantiateGridSide(new Vector3(-halfRoomSize, halfRoomSize, -halfRoomSize), new Vector3(90, 0, 0), 0.0f, "Wall N grid", gridBaseMat);
@@ -95,6 +126,17 @@ public class RoomController : MonoBehaviour {
         roomSides.Add(ROOM_SIDES.CEILING, currentGrid);
 
         currentSide = ROOM_SIDES.FLOOR;
+
+
+        // set default state texts
+        UpdateWordCapacityStatus();
+        UpdateEnergyStatus();
+        UpdateBuildingMaterialStatus();
+        UpdateResearchProgress();
+
+        // display intro window
+        beginWindow.SetActive(true);
+        PauseGame();
     }
 
     // instantiate grid on given position and return RoomGrid component on new grid
@@ -110,6 +152,8 @@ public class RoomController : MonoBehaviour {
         RoomGrid grid = gridObj.GetComponent<RoomGrid>();
         grid.CreateGrid(gridWidth, gridHeight, spacing);
 
+        // place random starting position for energy node and data input
+
         return grid;
     }
 
@@ -119,6 +163,11 @@ public class RoomController : MonoBehaviour {
 
     public void ResumeGame() {
         isGameRunning = true;
+    }
+
+    public void RestartGame() {
+        int scene = SceneManager.GetActiveScene().buildIndex;
+        SceneManager.LoadScene(scene, LoadSceneMode.Single);
     }
 
     public void PauseGame() {
@@ -136,6 +185,10 @@ public class RoomController : MonoBehaviour {
                 isRotating = false;
                 EnableConstructionHighlight();
             }
+        }
+
+        if (!isGameRunning) {
+            return;
         }
 
         HandleDragSelect();
@@ -170,7 +223,8 @@ public class RoomController : MonoBehaviour {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hitInfo;
             if (Physics.Raycast(ray, out hitInfo, 50.0f, interactionMask)) {  // 8 = interaction layer
-                GridData[] highlightedCells = activeGrid.GetGridCellsBetweenPoints(startDrag, hitInfo.point);
+                GridData[] highlightedCells = activeGrid.GetGridCellsBetweenPoints(startDrag, hitInfo.point, true);
+                highlightedCells = TrimConstructionArrayWithAvalibleMaterial(highlightedCells);
                 highlightController.SetActiveCells(highlightedCells);
             }
         }
@@ -179,7 +233,8 @@ public class RoomController : MonoBehaviour {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hitInfo;
             if (Physics.Raycast(ray, out hitInfo, 50.0f, interactionMask)) {  // 8 = interaction layer
-                GridData[] highlightedCells = activeGrid.GetGridCellsBetweenPoints(startDrag, hitInfo.point);
+                GridData[] highlightedCells = activeGrid.GetGridCellsBetweenPoints(startDrag, hitInfo.point, true);
+                highlightedCells = TrimConstructionArrayWithAvalibleMaterial(highlightedCells);
                 highlightController.SetActiveCells(null);// clear highlight
                 startDrag = Vector3.zero;
                 isDragSelect = false;
@@ -198,11 +253,20 @@ public class RoomController : MonoBehaviour {
     }
 
     public void RotateRoom(ROOM_SIDES targetSide) {
+        if (!isGameRunning) {
+            return;
+        }
+        if (targetSide == currentSide)
+            return;
+
+        currentSide = targetSide;
         activeGrid = roomSides[targetSide];
         roomTargetRotation = -activeGrid.transform.localRotation.eulerAngles;
         isRotating = true;
         highlightController.DisableInteraction();
         highlightController.SetActiveGrid(activeGrid);
+
+        audioController.PlayRotateSound();
     }
 
     public void RotateRoomByNum(int gridNum) {
@@ -229,6 +293,9 @@ public class RoomController : MonoBehaviour {
     }
 
     public void SetConstructionMode(CONSTRUCTION_MODE mode) {
+        if (!isGameRunning) {
+            return;
+        }
         constructionMode = mode;
 
         EnableConstructionHighlight();
@@ -264,21 +331,146 @@ public class RoomController : MonoBehaviour {
     }
 
     private void ConstructOnGridCells(GridData[] gridCells) {
+        bool success = false;
         foreach (GridData cell in gridCells) {
             switch (constructionMode) {
                 case CONSTRUCTION_MODE.BUS:
-                    cell.ConstructBuilding(bus);
+                    success |= cell.ConstructBuilding(bus);
                     break;
                 case CONSTRUCTION_MODE.STORAGE:
-                    cell.ConstructBuilding(storage);
+                    success |= cell.ConstructBuilding(storage);
                     break;
                 case CONSTRUCTION_MODE.ENERGY_BANK:
-                    cell.ConstructBuilding(energyStorage);
+                    success |= cell.ConstructBuilding(energyStorage);
                     break;
                 case CONSTRUCTION_MODE.SCIENCE:
-                    cell.ConstructBuilding(scienceCenter);
+                    success |= cell.ConstructBuilding(scienceCenter);
                     break;
             }
-        } 
+        }
+
+        if (success) {
+            audioController.PlayPlaceSound();
+
+            // consume building material for each builded cell
+            ConsumeBuildingMaterial(gridCells.Length);
+        }
+    }
+
+    private GridData[] TrimConstructionArrayWithAvalibleMaterial(GridData[] gridCells) {
+        if (gridCells.Length > buildingMaterialPoints) {
+            GridData[] newGrid = new GridData[buildingMaterialPoints];
+            // copy avalible cells to shorter array
+            for (int i = 0; i < buildingMaterialPoints; i++) {
+                newGrid[i] = gridCells[i];
+            }
+
+            return newGrid;
+        }
+
+        return gridCells;
+    }
+
+    //////////////////////////////////////////////////
+    // message status texts
+    //////////////////////////////////////////////////
+
+    private void UpdateWordCapacityStatus() {
+        storageText.text = currentWorlds + " / " + wordCapacity + " Words";
+    }
+
+    private void UpdateEnergyStatus() {
+        energyText.text = energyCount + " Units";
+    }
+
+    private void UpdateBuildingMaterialStatus() {
+        materialText.text = buildingMaterialPoints + " Units";
+    }
+
+    private void UpdateResearchProgress() {
+        researchText.text = researchPoints + " %";
+    }
+
+    //////////////////////////////////////////////////
+    // message window triggers
+    //////////////////////////////////////////////////
+
+    private void TriggerMemoryCorruptionEnd() {
+
+    }
+
+    private void TriggerAIVictoryEnd() {
+
+    }
+
+    ///////////////////////////////////////////////////
+    // Game logic methods
+    ///////////////////////////////////////////////////
+
+    /// <summary>
+    /// Add new avalible capacity for words to store
+    /// </summary>
+    /// <param name="capacity">New capacity</param>
+    public void AddWordCapacity(int capacity) {
+        wordCapacity += capacity;
+        UpdateWordCapacityStatus();
+    }
+
+    public void AddWords(int wordsCount) {
+        currentWorlds += wordsCount;
+
+        // end game / memory corruption
+        if (currentWorlds > wordCapacity) {
+            TriggerMemoryCorruptionEnd();
+        }
+
+        UpdateWordCapacityStatus();
+    }
+
+    public void AddEnergy(int newEnergy) {
+        energyCount += newEnergy;
+
+        UpdateEnergyStatus();
+    }
+
+    public void ConsumeEnergy(int energy) {
+        energyCount -= energy;
+        if (energyCount < 0) {
+            energyCount = 0;
+        }
+
+        UpdateEnergyStatus();
+    }
+
+    public void AddBuildingMaterial(int newMaterial) {
+        buildingMaterialPoints += newMaterial;
+
+        UpdateBuildingMaterialStatus();
+    }
+
+    public void ConsumeBuildingMaterial(int materialCost) {
+        buildingMaterialPoints -= materialCost;
+        if (buildingMaterialPoints < 0) {
+            buildingMaterialPoints = 0;
+        }
+
+        UpdateBuildingMaterialStatus();
+    }
+
+    public void AddResearchPoints(int points) {
+        researchPoints += points;
+
+        if (researchPoints >= 100) {
+
+        }
+        UpdateResearchProgress();
+    }
+
+    public void RemoveResearchPoints(int points) {
+        researchPoints -= points;
+        if (researchPoints < 0) {
+            researchPoints = 0;
+        }
+        UpdateResearchProgress();
     }
 }

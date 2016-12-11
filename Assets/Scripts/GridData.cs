@@ -51,17 +51,24 @@ public class GridData {
         notifications -= stateChangeCallback;
     }
 
-    public void ConstructBuilding(GenericBuilding newBuilding) {
+    public bool ConstructBuilding(GenericBuilding newBuilding, bool isGenerated = false) {
         if (gridState != GRID_STATE.AVALIBLE) {
-            return;
+            return false;
         }
 
         gridBuilding = parentGrid.InstantiateBuildingOnGrid(newBuilding, posX, posY);
-        gridState = GRID_STATE.BUILDED;
+        if (isGenerated) {
+            gridState = GRID_STATE.BLOCKED;
+        } else {
+            gridState = GRID_STATE.BUILDED;
+        }
+            
 
         if (notifications != null) {
             notifications(gridState, this);
         }
+
+        return true;
     }
 
     public void DestroyBuilding() {
@@ -77,5 +84,7 @@ public class GridData {
         return gridBuilding;
     }
 
-
+    public bool IsAvalible {
+        get { return gridState == GRID_STATE.AVALIBLE; }
+    }
 }
