@@ -56,6 +56,21 @@ public class GridData {
             return false;
         }
 
+        GridData[] neighbors = parentGrid.GetGridNeighbors(posX, posY);
+
+        // check if at least one neighbor have grid connect
+        bool isNeigborGrid = false;
+        foreach (GridData cell in neighbors) {
+            if(cell.IsGridConnection) {
+                isNeigborGrid = true;
+            }
+        }
+
+        // return fail if new construction doesnt neighbor with active grid
+        if (!isNeigborGrid && !isGenerated) {
+            return false;
+        }
+
         gridBuilding = parentGrid.InstantiateBuildingOnGrid(newBuilding, posX, posY);
         if (isGenerated) {
             gridState = GRID_STATE.BLOCKED;
@@ -86,5 +101,14 @@ public class GridData {
 
     public bool IsAvalible {
         get { return gridState == GRID_STATE.AVALIBLE; }
+    }
+
+    public bool IsGridConnection {
+        get {
+            if (gridBuilding != null) {
+                return gridBuilding.IsGridConnection;
+            }
+            return false;
+        }
     }
 }

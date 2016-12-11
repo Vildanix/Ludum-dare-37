@@ -142,3 +142,4 @@ MonoBehaviour:
   buildingName: Data source
   energy: 0
   requiredPopulation: 0
+  isGridConnection: 1

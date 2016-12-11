@@ -19,6 +19,9 @@ public class GenericBuilding : MonoBehaviour{
     [Range(0, 20)]
     private int requiredPopulation;
 
+    [SerializeField]
+    private bool isGridConnection = false;
+
     private int posX;
     private int posY;
 
@@ -82,5 +85,13 @@ public class GenericBuilding : MonoBehaviour{
         }
     }
 
-    
+    public bool IsGridConnection {
+        get {
+            return isGridConnection;
+        }
+
+        set {
+            isGridConnection = value;
+        }
+    }
 }

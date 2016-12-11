@@ -34,27 +34,36 @@ public class RoomGrid : MonoBehaviour{
 
     // create new meshes for grid. (Max 150 x 100 grid)
     public void CreateGrid(int cell_x, int cell_y, float spacing = 0.0f, bool isHighlight = false) {
-        // set current grid size
-        gridWidth = cell_x;
-        gridHeight = cell_y;
+        // set current grid size (-2 is for grid cell border)
+        gridWidth = cell_x - 2;
+        gridHeight = cell_y - 2;
 
         gridMesh = new Mesh();
         gridMesh.name = "Room Grid plane";
 
         if (!isHighlight) {
             // leave space
-            gridInformation = new GridData[cell_x * cell_y];
-            for (int i = 0; i < cell_x * cell_y; i++) {
+            gridInformation = new GridData[gridWidth * gridHeight];
+            for (int i = 0; i < gridWidth * gridHeight; i++) {
                 gridInformation[i] = new GridData(i % gridWidth, i / gridWidth, this);
             }
         }
 
         // create mesh vertices. Each grid cell have separate quad
-        for (int i = 0, y = 0; y < cell_y; y++) {
-            for (int x = 0; x < cell_x; x++, i++) {
-                CreateGridQuad(i, x, y, new Vector2(0, 0), spacing, isHighlight);
+        if (isHighlight) {
+            for (int i = 0, y = 0; y < gridHeight; y++) {
+                for (int x = 0; x < gridWidth; x++, i++) {
+                    CreateGridQuad(i, x + 1, y + 1, new Vector2(0, 0), spacing, isHighlight);
+                }
+            }
+        } else {
+            for (int i = 0, y = 0; y < cell_y; y++) {
+                for (int x = 0; x < cell_x; x++, i++) {
+                    CreateGridQuad(i, x, y, new Vector2(0, 0), spacing, isHighlight);
+                }
             }
         }
+        
 
         // set constructed mesh data
         useColors = true;
@@ -147,7 +156,37 @@ public class RoomGrid : MonoBehaviour{
     public GridData[] GetGridData() {
         return gridInformation;
     }
-    
+
+    public GridData[] GetGridNeighbors(int x, int y) {
+        List<GridData> neighbors = new List<GridData>();
+
+        if (IsValidGridCoord(x-1, y)) {
+            neighbors.Add(gridInformation[x - 1 + y * gridWidth]);
+        }
+
+        if (IsValidGridCoord(x + 1, y)) {
+            neighbors.Add(gridInformation[x + 1 + y * gridWidth]);
+        }
+
+        if (IsValidGridCoord(x, y - 1)) {
+            neighbors.Add(gridInformation[x + (y - 1) * gridWidth]);
+        }
+
+        if (IsValidGridCoord(x, y + 1)) {
+            neighbors.Add(gridInformation[x + (y + 1) * gridWidth]);
+        }
+
+        return neighbors.ToArray();
+    }
+
+    private bool IsValidGridCoord(int x, int y) {
+        if (x >= 0 && y >= 0 && x < gridWidth && y < gridHeight) {
+            return true;
+        }
+
+        return false;
+    }
+
     // Get array of cells between two point in world space on grid that are currently on bottom
     public GridData[] GetGridCellsBetweenPoints(Vector3 startPoint, Vector3 endPoints, bool onlyAvalible = false) {
         float worldWidth = gridWidth * transform.localScale.x;
@@ -219,7 +258,21 @@ public class RoomGrid : MonoBehaviour{
     }
 
     public Vector3 getConstructionPosition(int x, int y) {
-        return new Vector3(x + 0.5f, 0, y + 0.5f);
+        // offset by 1 + 0.5 to compensate empty grid border and center of cell
+        return new Vector3(x + 1.5f, 0, y + 1.5f);
+    }
+
+    public void PlaceBuildingRandom(GenericBuilding building) {
+        int x, y;
+        x = (int)(Random.value * gridWidth);
+        y = (int)(Random.value * gridWidth);
+
+        while (!GetGridDataCell(x, y).IsAvalible) {
+            x = (int)(Random.value * gridWidth);
+            y = (int)(Random.value * gridWidth);
+        }
+
+        GetGridDataCell(x, y).ConstructBuilding(building, true);
     }
 
 }

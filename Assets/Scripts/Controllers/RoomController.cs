@@ -9,7 +9,6 @@ public class RoomController : MonoBehaviour {
     public enum ROOM_SIDES {FLOOR, WALL_N, WALL_E, WALL_S, WALL_W, CEILING};
     Dictionary<ROOM_SIDES, RoomGrid> roomSides;
     public HightlightController highlightController;
-    public GridController gridController;
     public AudioController audioController;
 
     // presets
@@ -84,10 +83,6 @@ public class RoomController : MonoBehaviour {
             Debug.LogError("RoomController missing grid prefab");
         }
 
-        if (!gridController) {
-            gridController = GetComponent<GridController>();
-        }
-
         float halfRoomSize = cubeSize / 2;
 
         RoomGrid highlightGrid = highlightController.GetComponent<RoomGrid>();
@@ -153,6 +148,8 @@ public class RoomController : MonoBehaviour {
         grid.CreateGrid(gridWidth, gridHeight, spacing);
 
         // place random starting position for energy node and data input
+        grid.PlaceBuildingRandom(dataSource);
+        grid.PlaceBuildingRandom(energySource);
 
         return grid;
     }
@@ -332,19 +329,32 @@ public class RoomController : MonoBehaviour {
 
     private void ConstructOnGridCells(GridData[] gridCells) {
         bool success = false;
+        int successfullPlacements = 0;
         foreach (GridData cell in gridCells) {
             switch (constructionMode) {
                 case CONSTRUCTION_MODE.BUS:
-                    success |= cell.ConstructBuilding(bus);
+                    if (cell.ConstructBuilding(bus)) {
+                        successfullPlacements++;
+                        success = true;
+                    }
                     break;
                 case CONSTRUCTION_MODE.STORAGE:
-                    success |= cell.ConstructBuilding(storage);
+                    if (cell.ConstructBuilding(storage)) {
+                        successfullPlacements++;
+                        success = true;
+                    }
                     break;
                 case CONSTRUCTION_MODE.ENERGY_BANK:
-                    success |= cell.ConstructBuilding(energyStorage);
+                    if (cell.ConstructBuilding(energyStorage)) {
+                        successfullPlacements++;
+                        success = true;
+                    }
                     break;
                 case CONSTRUCTION_MODE.SCIENCE:
-                    success |= cell.ConstructBuilding(scienceCenter);
+                    if (cell.ConstructBuilding(scienceCenter)) {
+                        successfullPlacements++;
+                        success = true;
+                    }
                     break;
             }
         }
@@ -353,7 +363,7 @@ public class RoomController : MonoBehaviour {
             audioController.PlayPlaceSound();
 
             // consume building material for each builded cell
-            ConsumeBuildingMaterial(gridCells.Length);
+            ConsumeBuildingMaterial(successfullPlacements);
         }
     }
 

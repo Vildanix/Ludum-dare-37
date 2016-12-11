@@ -51,7 +51,7 @@ public class HightlightController : MonoBehaviour {
         //activeGrid = grid;
 
         // rebuild highlight for new grid
-        GridData[] gridData = grid.GetGridData();
+        //GridData[] gridData = grid.GetGridData();
 
         highlightGrid.ResetGridColors();
     }
