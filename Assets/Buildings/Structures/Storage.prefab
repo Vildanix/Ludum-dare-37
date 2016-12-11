@@ -141,4 +141,5 @@ MonoBehaviour:
   buildingType: 1
   buildingName: Memory block
   energy: 0
-  requiredPopulation: 0
+  capacity: 3
+  isGridConnection: 0

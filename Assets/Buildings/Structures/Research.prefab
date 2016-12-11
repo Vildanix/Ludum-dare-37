@@ -140,5 +140,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   buildingType: 2
   buildingName: Research
-  energy: 0
-  requiredPopulation: 0
+  energy: -1
+  capacity: 0
+  isGridConnection: 0

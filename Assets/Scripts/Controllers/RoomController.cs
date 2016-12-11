@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -31,16 +32,25 @@ public class RoomController : MonoBehaviour {
 
     // game logic values
     private bool isGameRunning = false;
-    private int currentWorlds = 0;
+    private int currentWords = 0;
     private int wordCapacity = 0;
-
     private int energyCount = 10;
     private int buildingMaterialPoints = 10;
-
     private int researchPoints = 0;
 
-    private float nextWordTimer = 20;
+    // event timers
+    public float tickInterval = 1.0f;       // 1 second tick interval
+    public float worldTimerInterval = 15.0f;       // 20 second world event interval
+    private float worldEventTimer = 30.0f;
+    private float updateTickTimer = 1.0f;
+    private int materialTicks = 0;
 
+    // building statistics
+    private int gridBuildingsCount = 0;
+    private int storageBuildingsCount = 0;
+    private int energyBuildingsCount = 0;
+    private int scienceBuildingsCount = 0;
+    private int energyNodesConnected = 0;
 
     [Header("BuildingObjects")]
     // building for map setup
@@ -59,12 +69,15 @@ public class RoomController : MonoBehaviour {
     public GameObject secondResearchWindow;
     public GameObject victoryWindow;
     public GameObject failedMemoryWindow;
+    public GameObject negativeEnergyWindow;
 
     [Header("Statitics")]
     public Text storageText;
     public Text energyText;
     public Text materialText;
     public Text researchText;
+    public Text eventText;
+    public Text eventTimerText;
 
     [Header("GridTabs")]
     public GameObject tab0;
@@ -76,6 +89,9 @@ public class RoomController : MonoBehaviour {
 
     public enum CONSTRUCTION_MODE {NONE, BUS, STORAGE, ENERGY_BANK, DESTROY, SCIENCE};
     private CONSTRUCTION_MODE constructionMode = CONSTRUCTION_MODE.NONE;
+
+    private Action nextEvent = null;
+    private int researchComplete = 0;
 
     // inicialize map qube
     void Start () {
@@ -132,6 +148,18 @@ public class RoomController : MonoBehaviour {
         // display intro window
         beginWindow.SetActive(true);
         PauseGame();
+        tab0.SetActive(false);
+        tab1.SetActive(false);
+        tab2.SetActive(false);
+        tab3.SetActive(false);
+        tab4.SetActive(false);
+        tab5.SetActive(false);
+        negativeEnergyWindow.SetActive(false);
+
+        // plan next event to be word arival
+        nextEvent += WordAriveTwo;
+        eventText.text = "Two new words arives";
+        eventTimerText.text = String.Format("{0:0.} s", worldEventTimer);
     }
 
     // instantiate grid on given position and return RoomGrid component on new grid
@@ -149,7 +177,7 @@ public class RoomController : MonoBehaviour {
 
         // place random starting position for energy node and data input
         grid.PlaceBuildingRandom(dataSource);
-        grid.PlaceBuildingRandom(energySource);
+        //grid.PlaceBuildingRandom(energySource);
 
         return grid;
     }
@@ -190,6 +218,7 @@ public class RoomController : MonoBehaviour {
 
         HandleDragSelect();
         HandleConstructionCancel();
+        HandleGameTicks();
     }
 
     private void HandleDragSelect() {
@@ -247,6 +276,34 @@ public class RoomController : MonoBehaviour {
             constructionMode = CONSTRUCTION_MODE.NONE;
             highlightController.DisableInteraction();
         }   
+    }
+
+    private void HandleGameTicks() {
+        updateTickTimer -= Time.deltaTime;
+        worldEventTimer -= Time.deltaTime;
+
+        eventTimerText.text = String.Format("{0:0.} s", worldEventTimer);
+
+        float multiplier = 1.0f;
+        if (energyCount < 0) {
+            multiplier = 2.0f;
+        }
+        if (energyCount < -10) {
+            multiplier = 4.0f;
+        }
+
+        // reset tick timer
+        if (updateTickTimer < 0) {
+            updateTickTimer += tickInterval * multiplier;
+            ProccessBuildings();
+        }
+
+        // reset event timer
+        if (worldEventTimer < 0) {
+            worldEventTimer += worldTimerInterval;
+            DispatchCurrentEvent();
+            GenerateNewEvent();
+        }
     }
 
     public void RotateRoom(ROOM_SIDES targetSide) {
@@ -335,24 +392,36 @@ public class RoomController : MonoBehaviour {
                 case CONSTRUCTION_MODE.BUS:
                     if (cell.ConstructBuilding(bus)) {
                         successfullPlacements++;
+                        gridBuildingsCount++;
+                        AddWordCapacity(bus.PopulationCapacity);
+                        AddEnergy(bus.Energy);
                         success = true;
                     }
                     break;
                 case CONSTRUCTION_MODE.STORAGE:
                     if (cell.ConstructBuilding(storage)) {
                         successfullPlacements++;
+                        storageBuildingsCount++;
+                        AddWordCapacity(storage.PopulationCapacity);
+                        AddEnergy(storage.Energy);
                         success = true;
                     }
                     break;
                 case CONSTRUCTION_MODE.ENERGY_BANK:
                     if (cell.ConstructBuilding(energyStorage)) {
                         successfullPlacements++;
+                        energyBuildingsCount++;
+                        AddWordCapacity(energyStorage.PopulationCapacity);
+                        AddEnergy(energyStorage.Energy);
                         success = true;
                     }
                     break;
                 case CONSTRUCTION_MODE.SCIENCE:
                     if (cell.ConstructBuilding(scienceCenter)) {
                         successfullPlacements++;
+                        scienceBuildingsCount++;
+                        AddWordCapacity(scienceCenter.PopulationCapacity);
+                        AddEnergy(scienceCenter.Energy);
                         success = true;
                     }
                     break;
@@ -382,15 +451,130 @@ public class RoomController : MonoBehaviour {
     }
 
     //////////////////////////////////////////////////
+    // events and intervals
+    //////////////////////////////////////////////////
+    private void DispatchCurrentEvent() {
+        nextEvent();
+
+        // remove action
+        foreach (Delegate d in nextEvent.GetInvocationList()) {
+            nextEvent -= (Action)d;
+        }
+    }
+
+    private void GenerateNewEvent() {
+        int eventNum = Mathf.FloorToInt(UnityEngine.Random.value * 10);
+
+        switch (eventNum) {
+            case 0:
+                nextEvent += WordAriveOne;
+                eventText.text = "One new word arive";
+                break;
+            case 1:
+                nextEvent += WordAriveTwo;
+                eventText.text = "Two new words arives";
+                break;
+            case 2:
+                nextEvent += WordAriveThree;
+                eventText.text = "Three new words arives";
+                break;
+            case 3:
+                nextEvent += EnergyDischarge;
+                eventText.text = "Energy loss";
+                break;
+            case 4:
+                nextEvent += EnergyBoost;
+                eventText.text = "Energy boost";
+                break;
+            case 5:
+                nextEvent += AdditionalMaterial;
+                eventText.text = "Additional material";
+                break;
+            case 6:
+                nextEvent += WordAriveFour;
+                eventText.text = "Four new words arives";
+                break;
+            case 7:
+                nextEvent += WordAriveFour;
+                eventText.text = "Four new words arives";
+                break;
+            case 8:
+                nextEvent += EnergyDischarge;
+                eventText.text = "Energy loss";
+                break;
+            case 9:
+                nextEvent += WordAriveFour;
+                eventText.text = "Four new words arives";
+                break;
+            default:
+                nextEvent += WordAriveTwo;
+                eventText.text = "One new word arive";
+                break;
+        }
+    }
+
+    private void ProccessBuildings() {
+        materialTicks++;
+        Debug.Log("Tick");
+
+        if (materialTicks >= 3) {
+            // add material proportionly to free words
+            int avalibleWords = Mathf.Max(currentWords - scienceBuildingsCount, 0);
+            AddBuildingMaterial(Mathf.CeilToInt(avalibleWords / 2) + 1);     // each free word give half material unit each cycle
+            materialTicks = 0;
+        }
+
+        int scienceGrow = Mathf.CeilToInt(Mathf.Min(scienceBuildingsCount, currentWords) / (2 + researchComplete * 2));
+        AddResearchPoints(scienceGrow);
+    }
+
+    private void WordAriveOne() {
+        AddWords(1);
+    }
+
+    private void WordAriveTwo() {
+        AddWords(2);
+    }
+
+    private void WordAriveThree() {
+        AddWords(3);
+    }
+
+    private void WordAriveFour() {
+        AddWords(4);
+    }
+
+    private void EnergyDischarge() {
+        AddEnergy(-6);
+    }
+
+    private void EnergyBoost() {
+        AddEnergy(3);
+    }
+
+    private void AdditionalMaterial() {
+        AddBuildingMaterial(3);
+    }
+
+
+
+
+    //////////////////////////////////////////////////
     // message status texts
     //////////////////////////////////////////////////
 
     private void UpdateWordCapacityStatus() {
-        storageText.text = currentWorlds + " / " + wordCapacity + " Words";
+        storageText.text = currentWords + " / " + wordCapacity + " Words";
     }
 
     private void UpdateEnergyStatus() {
         energyText.text = energyCount + " Units";
+
+        if (energyCount < 0) {
+            negativeEnergyWindow.SetActive(true);
+        } else {
+            negativeEnergyWindow.SetActive(false);
+        }
     }
 
     private void UpdateBuildingMaterialStatus() {
@@ -406,11 +590,29 @@ public class RoomController : MonoBehaviour {
     //////////////////////////////////////////////////
 
     private void TriggerMemoryCorruptionEnd() {
-
+        PauseGame();
+        failedMemoryWindow.SetActive(true);
     }
 
     private void TriggerAIVictoryEnd() {
+        PauseGame();
+        victoryWindow.SetActive(true);
+    }
 
+    private void TriggerFirstResearch() {
+        PauseGame();
+        firstResearchWindow.SetActive(true);
+        tab0.SetActive(true);
+        tab1.SetActive(true);
+        tab2.SetActive(true);
+    }
+
+    private void TriggerSeconfResearch() {
+        PauseGame();
+        secondResearchWindow.SetActive(true);
+        tab3.SetActive(true);
+        tab4.SetActive(true);
+        tab5.SetActive(true);
     }
 
     ///////////////////////////////////////////////////
@@ -427,10 +629,10 @@ public class RoomController : MonoBehaviour {
     }
 
     public void AddWords(int wordsCount) {
-        currentWorlds += wordsCount;
+        currentWords += wordsCount;
 
         // end game / memory corruption
-        if (currentWorlds > wordCapacity) {
+        if (currentWords > wordCapacity) {
             TriggerMemoryCorruptionEnd();
         }
 
@@ -445,9 +647,6 @@ public class RoomController : MonoBehaviour {
 
     public void ConsumeEnergy(int energy) {
         energyCount -= energy;
-        if (energyCount < 0) {
-            energyCount = 0;
-        }
 
         UpdateEnergyStatus();
     }
@@ -471,7 +670,21 @@ public class RoomController : MonoBehaviour {
         researchPoints += points;
 
         if (researchPoints >= 100) {
+            researchComplete++;
+            worldTimerInterval -= 1;
+            if (worldTimerInterval < 3) {
+                worldTimerInterval = 3.0f;
+            }
 
+            switch (researchComplete) {
+                case 1:
+                    TriggerFirstResearch();
+                    break;
+                case 2:
+                    TriggerSeconfResearch();
+                    break;
+            }
+            researchPoints = 0;
         }
         UpdateResearchProgress();
     }

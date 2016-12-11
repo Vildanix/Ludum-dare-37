@@ -140,6 +140,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   buildingType: 0
   buildingName: Bus
-  energy: 0
-  requiredPopulation: 0
+  energy: -1
+  capacity: 0
   isGridConnection: 1

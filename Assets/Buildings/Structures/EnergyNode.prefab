@@ -140,5 +140,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   buildingType: 4
   buildingName: Energy node
-  energy: 100
-  requiredPopulation: 0
+  energy: 30
+  capacity: 0
+  isGridConnection: 0

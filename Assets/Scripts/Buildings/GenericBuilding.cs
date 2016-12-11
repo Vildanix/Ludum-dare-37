@@ -17,7 +17,7 @@ public class GenericBuilding : MonoBehaviour{
 
     [SerializeField]
     [Range(0, 20)]
-    private int requiredPopulation;
+    private int capacity;
 
     [SerializeField]
     private bool isGridConnection = false;
@@ -45,13 +45,13 @@ public class GenericBuilding : MonoBehaviour{
         }
     }
 
-    public int RequiredPopulation {
+    public int PopulationCapacity {
         get {
-            return requiredPopulation;
+            return capacity;
         }
 
         set {
-            requiredPopulation = value;
+            capacity = value;
         }
     }
 
