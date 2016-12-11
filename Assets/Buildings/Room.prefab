@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 33047589590599606}
   - component: {fileID: 23660988055007744}
   - component: {fileID: 114160934307219972}
+  - component: {fileID: 114409181193702926}
   m_Layer: 0
   m_Name: Room
   m_TagString: Untagged
@@ -92,6 +93,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   highlightController: {fileID: 0}
+  gridController: {fileID: 0}
   gridPrefab: {fileID: 1039198987362894, guid: cbdf679f4afc34f40befe5b04cca53ae, type: 2}
   gridBaseMat: {fileID: 2100000, guid: f2bd64f3d5b8f4344a72946766bc88a7, type: 2}
   gridWidth: 25
@@ -101,3 +103,14 @@ MonoBehaviour:
   interactionMask:
     serializedVersion: 2
     m_Bits: 256
+--- !u!114 &114409181193702926
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1958808949939320}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d14480430a245748bb2a2543745c3a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

@@ -168,6 +168,8 @@ public class RoomGrid : MonoBehaviour{
             }
 
             return subgrid;
+
+        // select verticaly
         } else {
             if (startY > endY) {
                 temp = startY;
@@ -182,10 +184,6 @@ public class RoomGrid : MonoBehaviour{
 
             return subgrid;
         }
-
-
-        // no selection was possible (out of bounds?)
-        return null;
     }
 
 

@@ -1,11 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class RoomController : MonoBehaviour {
     public enum ROOM_SIDES {FLOOR, WALL_N, WALL_E, WALL_S, WALL_W, CEILING};
     Dictionary<ROOM_SIDES, RoomGrid> roomSides;
     public HightlightController highlightController;
+    public GridController gridController;
 
     // presets
     public GameObject gridPrefab;
@@ -26,9 +29,13 @@ public class RoomController : MonoBehaviour {
     public LayerMask interactionMask;
 
     // inicialize map qube
-    void Awake () {
+    void Start () {
         if (!gridPrefab) {
             Debug.LogError("RoomController missing grid prefab");
+        }
+
+        if (!gridController) {
+            gridController = GetComponent<GridController>();
         }
 
         float halfRoomSize = cubeSize / 2;
@@ -114,17 +121,30 @@ public class RoomController : MonoBehaviour {
     }
 
     private void HandleDragSelect() {
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            isDragSelect = false;
+            highlightController.SetActiveCells(null);// clear highlight
+            return;
+        }
+
+        if (EventSystem.current.IsPointerOverGameObject()) {
+            highlightController.SetActiveCells(null);// clear highlight
+            return;
+        }
+
+
         // start draging event on mouse down
         if (Input.GetMouseButtonDown(0)) {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hitInfo;
             if (Physics.Raycast(ray, out hitInfo, 50.0f, interactionMask)) {  // 8 = interaction layer
                 startDrag = hitInfo.point;
+                isDragSelect = true;
             }
         }
 
         // update draging on mouse button
-        if (Input.GetMouseButton(0)) {
+        if (Input.GetMouseButton(0) && isDragSelect) {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hitInfo;
             if (Physics.Raycast(ray, out hitInfo, 50.0f, interactionMask)) {  // 8 = interaction layer
@@ -132,15 +152,15 @@ public class RoomController : MonoBehaviour {
                 highlightController.SetActiveCells(highlightedCells);
             }
         }
-
         // end draging event and proccess
-        if (Input.GetMouseButtonUp(0) || !Input.GetMouseButton(0)) {
+        if ((Input.GetMouseButtonUp(0) || !Input.GetMouseButton(0)) && isDragSelect) {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hitInfo;
             if (Physics.Raycast(ray, out hitInfo, 50.0f, interactionMask)) {  // 8 = interaction layer
                 GridData[] highlightedCells = activeGrid.GetGridCellsBetweenPoints(startDrag, hitInfo.point);
                 highlightController.SetActiveCells(null);// clear highlight
-
+                startDrag = Vector3.zero;
+                isDragSelect = false;
                 // do selected action on selected cells
             }
         }
@@ -152,5 +172,28 @@ public class RoomController : MonoBehaviour {
         isRotating = true;
         highlightController.DisableInteraction();
         highlightController.SetActiveGrid(activeGrid);
+    }
+
+    public void RotateRoomByNum(int gridNum) {
+        switch (gridNum) {
+            case 0:
+                RotateRoom(ROOM_SIDES.FLOOR);
+                break;
+            case 1:
+                RotateRoom(ROOM_SIDES.WALL_N);
+                break;
+            case 2:
+                RotateRoom(ROOM_SIDES.WALL_E);
+                break;
+            case 3:
+                RotateRoom(ROOM_SIDES.WALL_S);
+                break;
+            case 4:
+                RotateRoom(ROOM_SIDES.WALL_W);
+                break;
+            case 5:
+                RotateRoom(ROOM_SIDES.CEILING);
+                break;
+        }
     }
 }

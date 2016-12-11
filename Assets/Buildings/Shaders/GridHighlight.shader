@@ -37,7 +37,7 @@ Shader "LD37/GridHighlight"
 			{
 				float2 uv : TEXCOORD0;
 				float4 color : Color;
-				float distance : FLOAT;
+				float distance : Float;
 				UNITY_FOG_COORDS(1)
 				float4 vertex : SV_POSITION;
 			};
