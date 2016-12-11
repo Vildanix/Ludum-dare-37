@@ -28,6 +28,9 @@ public class RoomController : MonoBehaviour {
     private RoomGrid activeGrid;
     public LayerMask interactionMask;
 
+    public enum CONSTRUCTION_MODE {NONE, BUS, STORAGE, ENERGY_BANK, DESTROY};
+    private CONSTRUCTION_MODE constructionMode = CONSTRUCTION_MODE.NONE;
+
     // inicialize map qube
     void Start () {
         if (!gridPrefab) {
@@ -44,6 +47,7 @@ public class RoomController : MonoBehaviour {
         highlightGrid.transform.localScale = new Vector3(cubeSize / gridWidth, 1, cubeSize / gridWidth);
         highlightGrid.transform.localPosition = new Vector3(-halfRoomSize, -halfRoomSize + 0.01f, -halfRoomSize);
         highlightGrid.CreateGrid(gridWidth, gridHeight, 0.1f, true);
+        highlightController.DisableInteraction();
 
         // initialize room
         roomSides = new Dictionary<ROOM_SIDES, RoomGrid>();
@@ -98,13 +102,6 @@ public class RoomController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		// testing rotation
-        if (Input.GetKeyDown(KeyCode.A)) {
-            RotateRoom(currentSide++);
-            if (currentSide == ROOM_SIDES.CEILING) {
-                currentSide = ROOM_SIDES.FLOOR;
-            } 
-        }
 
         if (isRotating) {
             Quaternion targetRotation = Quaternion.Euler(roomTargetRotation);
@@ -112,12 +109,12 @@ public class RoomController : MonoBehaviour {
             if (Quaternion.Angle(transform.rotation, targetRotation) < 0.5) {
                 transform.rotation = targetRotation;
                 isRotating = false;
-                highlightController.EnableInteraction();
+                EnableConstructionHighlight();
             }
         }
 
         HandleDragSelect();
-
+        HandleConstructionCancel();
     }
 
     private void HandleDragSelect() {
@@ -166,6 +163,13 @@ public class RoomController : MonoBehaviour {
         }
     }
 
+    private void HandleConstructionCancel() {
+        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetMouseButtonDown(1)) {
+            constructionMode = CONSTRUCTION_MODE.NONE;
+            highlightController.DisableInteraction();
+        }   
+    }
+
     public void RotateRoom(ROOM_SIDES targetSide) {
         activeGrid = roomSides[targetSide];
         roomTargetRotation = activeGrid.transform.localRotation.eulerAngles;
@@ -194,6 +198,38 @@ public class RoomController : MonoBehaviour {
             case 5:
                 RotateRoom(ROOM_SIDES.CEILING);
                 break;
+        }
+    }
+
+    public void SetConstructionMode(CONSTRUCTION_MODE mode) {
+        constructionMode = mode;
+
+        EnableConstructionHighlight();
+    }
+
+    public void SetConstructionModeByNum(int modeNum) {
+        switch (modeNum) {
+            case 0:
+                SetConstructionMode(CONSTRUCTION_MODE.NONE);
+                break;
+            case 1:
+                SetConstructionMode(CONSTRUCTION_MODE.BUS);
+                break;
+            case 2:
+                SetConstructionMode(CONSTRUCTION_MODE.STORAGE);
+                break;
+            case 3:
+                SetConstructionMode(CONSTRUCTION_MODE.ENERGY_BANK);
+                break;
+            case 4:
+                SetConstructionMode(CONSTRUCTION_MODE.DESTROY);
+                break;
+        }
+    }
+
+    private void EnableConstructionHighlight() {
+        if (constructionMode != CONSTRUCTION_MODE.NONE) {
+            highlightController.EnableInteraction();
         }
     }
 }
