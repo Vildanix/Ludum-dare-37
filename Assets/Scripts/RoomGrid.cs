@@ -275,4 +275,53 @@ public class RoomGrid : MonoBehaviour{
         GetGridDataCell(x, y).ConstructBuilding(building, true);
     }
 
+    public Vector3[] GetRandomPath(int tileLength) {
+        List<GridData> buildedCells = new List<GridData>();
+        List<Vector3> path = new List<Vector3>();
+        foreach (GridData cell in gridInformation) {
+            if (cell.getCurrentBuilding() != null) {
+                buildedCells.Add(cell);
+            }
+        }
+
+        int startBuildingIndex = Mathf.FloorToInt(Random.value * buildedCells.Count);
+        GridData currentCell = buildedCells[startBuildingIndex];
+        path.Add(currentCell.getCurrentBuilding().transform.localPosition);
+
+        int pathIndex = 1;
+        bool foundNextGrid = true;
+        while(pathIndex <= tileLength && foundNextGrid) {
+            GridData[] neighbors = GetGridNeighbors(currentCell.PosX, currentCell.PosY);
+
+            //foundNextGrid = false;
+            // on last path index find ending building 
+            GenericBuilding backupBuilding = null;
+            if (pathIndex == tileLength) {
+                foreach(GridData cell in neighbors) {
+                    GenericBuilding buildingOnCell = cell.getCurrentBuilding();
+                    if (buildingOnCell && !buildingOnCell.IsGridConnection) {
+                        path.Add(buildingOnCell.transform.localPosition);
+                        break;
+                    }
+                }
+
+            // find next grid tile that wasnt this
+            } else {
+                foreach (GridData cell in neighbors) {
+                    GenericBuilding buildingOnCell = cell.getCurrentBuilding();
+                    if (buildingOnCell && buildingOnCell.IsGridConnection && cell != currentCell) {
+                        path.Add(buildingOnCell.transform.localPosition);
+                        currentCell = cell;
+                        break;
+                    }
+                }
+            }
+
+            pathIndex++;
+        }
+        
+
+        return path.ToArray();
+    }
+
 }

@@ -6367,6 +6367,18 @@ Prefab:
       propertyPath: worldTimerInterval
       value: 10
       objectReference: {fileID: 0}
+    - target: {fileID: 114160934307219972, guid: 5fd52001e1412ba4688493c0ef3305e7,
+        type: 2}
+      propertyPath: unitOne
+      value: 
+      objectReference: {fileID: 114902272206502336, guid: e302f8a36e9ec254792aaa999e8048b5,
+        type: 2}
+    - target: {fileID: 114160934307219972, guid: 5fd52001e1412ba4688493c0ef3305e7,
+        type: 2}
+      propertyPath: unitZero
+      value: 
+      objectReference: {fileID: 114957483475015304, guid: 23ce2fc49b656f54d9a7a0813984e66d,
+        type: 2}
     m_RemovedComponents:
     - {fileID: 114409181193702926, guid: 5fd52001e1412ba4688493c0ef3305e7, type: 2}
   m_ParentPrefab: {fileID: 100100000, guid: 5fd52001e1412ba4688493c0ef3305e7, type: 2}

@@ -53,6 +53,11 @@ public class RoomController : MonoBehaviour {
     private int scienceBuildingsCount = 0;
     private int energyNodesConnected = 0;
 
+    [Header("DecorationUnits")]
+    // building for map setup
+    public UnitMovement unitZero;
+    public UnitMovement unitOne;
+
     [Header("BuildingObjects")]
     // building for map setup
     public GenericBuilding dataSource;
@@ -451,11 +456,20 @@ public class RoomController : MonoBehaviour {
     }
 
     private void SpawnBit() {
-        // find random building
-
-        // create path max 6 tiles long
+        // find random building and create random path over grid with given max length
+        Vector3[] path = activeGrid.GetRandomPath(6);
 
         // spawn new unit
+        UnitMovement spawnedUnit;
+        if (UnityEngine.Random.value * 2 > 1.0f) {
+            spawnedUnit = Instantiate(unitOne, activeGrid.transform);
+            spawnedUnit.transform.localScale = Vector3.one;
+        } else {
+            spawnedUnit = Instantiate(unitZero, activeGrid.transform);
+            spawnedUnit.transform.localScale = Vector3.one;
+        }
+
+        spawnedUnit.SetUnitPath(path);
     }
 
     //////////////////////////////////////////////////

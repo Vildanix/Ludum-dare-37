@@ -34,6 +34,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4029894450519782}
+  - component: {fileID: 114902272206502336}
   m_Layer: 0
   m_Name: Unit_One
   m_TagString: Untagged
@@ -274,6 +275,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   anim: {fileID: 0}
+--- !u!114 &114902272206502336
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1042692803636296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 746e2a1369bbb954ebe6b25464dbad8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  movementSpeed: 1
+  anim: {fileID: 95409851292627952}
 --- !u!137 &137173440488712622
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 1

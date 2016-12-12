@@ -111,6 +111,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4788820422399248}
+  - component: {fileID: 114957483475015304}
   m_Layer: 0
   m_Name: Unit_Zero
   m_TagString: Untagged
@@ -261,6 +262,19 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
+--- !u!114 &114957483475015304
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1794485941196864}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 746e2a1369bbb954ebe6b25464dbad8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  movementSpeed: 1
+  anim: {fileID: 95854509277797462}
 --- !u!137 &137420827527359024
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 1
