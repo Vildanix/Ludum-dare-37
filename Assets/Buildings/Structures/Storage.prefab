@@ -140,6 +140,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   buildingType: 1
   buildingName: Memory block
-  energy: 0
-  capacity: 3
+  energy: -3
+  capacity: 2
   isGridConnection: 0

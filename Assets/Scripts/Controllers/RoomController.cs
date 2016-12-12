@@ -31,6 +31,7 @@ public class RoomController : MonoBehaviour {
     public LayerMask interactionMask;
 
     // game logic values
+    public int wordsRequiredToWin = 200;
     private bool isGameRunning = false;
     private int currentWords = 0;
     private int wordCapacity = 0;
@@ -201,7 +202,6 @@ public class RoomController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-
         if (isRotating) {
             Quaternion targetRotation = Quaternion.Euler(roomTargetRotation);
             transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * roomRotationSpeed);
@@ -450,6 +450,14 @@ public class RoomController : MonoBehaviour {
         return gridCells;
     }
 
+    private void SpawnBit() {
+        // find random building
+
+        // create path max 6 tiles long
+
+        // spawn new unit
+    }
+
     //////////////////////////////////////////////////
     // events and intervals
     //////////////////////////////////////////////////
@@ -464,6 +472,9 @@ public class RoomController : MonoBehaviour {
 
     private void GenerateNewEvent() {
         int eventNum = Mathf.FloorToInt(UnityEngine.Random.value * 10);
+        if (researchComplete > 2) {
+            eventNum = Mathf.FloorToInt(UnityEngine.Random.value * 16);
+        }
 
         switch (eventNum) {
             case 0:
@@ -506,6 +517,30 @@ public class RoomController : MonoBehaviour {
                 nextEvent += WordAriveFour;
                 eventText.text = "Four new words arives";
                 break;
+            case 10:
+                nextEvent += WordAriveFour;
+                eventText.text = "Four new words arives";
+                break;
+            case 11:
+                nextEvent += WordAriveEight;
+                eventText.text = "Eight new words arives";
+                break;
+            case 12:
+                nextEvent += WordAriveTen;
+                eventText.text = "Ten new words arives";
+                break;
+            case 13:
+                nextEvent += MineralLeak;
+                eventText.text = "Mineral leak detected";
+                break;
+            case 14:
+                nextEvent += WordAriveTen;
+                eventText.text = "Ten new words arives";
+                break;
+            case 15:
+                nextEvent += WordAriveTen;
+                eventText.text = "Ten new words arives";
+                break;
             default:
                 nextEvent += WordAriveTwo;
                 eventText.text = "One new word arive";
@@ -515,12 +550,16 @@ public class RoomController : MonoBehaviour {
 
     private void ProccessBuildings() {
         materialTicks++;
-        Debug.Log("Tick");
 
-        if (materialTicks >= 3) {
+        if (materialTicks == 3) {
+            SpawnBit();
+        }
+
+        if (materialTicks >= 4) {
             // add material proportionly to free words
             int avalibleWords = Mathf.Max(currentWords - scienceBuildingsCount, 0);
-            AddBuildingMaterial(Mathf.CeilToInt(avalibleWords / 2) + 1);     // each free word give half material unit each cycle
+            int newMaterial = Mathf.Clamp( Mathf.CeilToInt(avalibleWords / 4), 1, 12 );
+            AddBuildingMaterial(newMaterial);     // each free word give quarter material unit each cycle
             materialTicks = 0;
         }
 
@@ -544,20 +583,29 @@ public class RoomController : MonoBehaviour {
         AddWords(4);
     }
 
+    private void WordAriveEight() {
+        AddWords(8);
+    }
+
+    private void WordAriveTen() {
+        AddWords(10);
+    }
+
+    private void MineralLeak() {
+        AddWords(-buildingMaterialPoints / 2);
+    }
+
     private void EnergyDischarge() {
-        AddEnergy(-6);
+        AddEnergy(Mathf.Min(-energyCount / 3, -9));
     }
 
     private void EnergyBoost() {
-        AddEnergy(3);
+        AddEnergy(6);
     }
 
     private void AdditionalMaterial() {
-        AddBuildingMaterial(3);
+        AddBuildingMaterial(4);
     }
-
-
-
 
     //////////////////////////////////////////////////
     // message status texts
@@ -634,6 +682,10 @@ public class RoomController : MonoBehaviour {
         // end game / memory corruption
         if (currentWords > wordCapacity) {
             TriggerMemoryCorruptionEnd();
+        }
+
+        if (currentWords >= wordsRequiredToWin) {
+            TriggerAIVictoryEnd();
         }
 
         UpdateWordCapacityStatus();

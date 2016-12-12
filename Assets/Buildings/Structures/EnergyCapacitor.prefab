@@ -140,6 +140,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   buildingType: 3
   buildingName: Capacitor
-  energy: 4
+  energy: 5
   capacity: 0
   isGridConnection: 0
